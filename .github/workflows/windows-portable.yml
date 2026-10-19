@@ -38,7 +38,7 @@ jobs:
       - name: Publier le lockfile généré pour pouvoir le versionner ensuite
         uses: actions/upload-artifact@v4
         with:
-          name: H5P-Studio-0.5.21-package-lock
+          name: H5P-Studio-0.6.0-package-lock
           path: package-lock.json
           if-no-files-found: error
           retention-days: 14
@@ -52,7 +52,7 @@ jobs:
       - name: Publier uniquement le dossier Windows portable
         uses: actions/upload-artifact@v4
         with:
-          name: H5P-Studio-Portable-0.5.21-Windows-DOSSIER
+          name: H5P-Studio-Portable-0.6.0-Windows-DOSSIER
           path: dist/win-unpacked/
           if-no-files-found: error
           retention-days: 14
