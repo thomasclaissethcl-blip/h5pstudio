@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
- <title>H5P Studio Portable | Version 0.6.0</title>
+ <title>H5P Studio Portable | Version 0.6.1</title>
  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -25,10 +25,10 @@
       <button data-tab="registry" id="registryTab">Registre multiversion</button>
       <button data-tab="updates" id="updatesTab">Sources et mises à jour</button>
    </nav>
-   <div class="side-foot">Version 0.6.0<br>Moteur embarqué lors de la compilation. Aucun installateur nécessaire.</div>
+   <div class="side-foot">Version 0.6.1<br>Moteur embarqué lors de la compilation. Aucun installateur nécessaire.</div>
  </aside>
  <main class="main">
-   <div class="head"><div><h1>H5P Studio : édition et prévisualisation</h1><p class="subtitle">Formulaire guidé pour champs simples, données avancées et prévisualisation locale.</p></div><div class="version">V0.6.0 expérimental</div></div>
+   <div class="head"><div><h1>H5P Studio : édition et prévisualisation</h1><p class="subtitle">Formulaire guidé pour champs simples, données avancées et prévisualisation locale.</p></div><div class="version">V0.6.1 expérimental</div></div>
    <div class="notice" id="message" role="status" aria-live="polite" hidden></div>
    <section class="panel" id="dropZone">
       <div class="drop"><div class="symbol" aria-hidden="true">&#8682;</div><h2>Ouvrir une activité .h5p</h2>
@@ -44,6 +44,12 @@
         <div class="stat"><label>Bibliothèques</label><div class="value" id="libraryCount"></div></div>
         <div class="stat"><label>Avertissements</label><div class="value" id="warningCount"></div></div>
       </div>
+      <section class="panel export-toolbar" aria-label="Enregistrement de l'activité H5P">
+        <div class="btns"><button id="saveBtn" class="primary" type="button">Enregistrer sous… (.h5p)</button>
+          <button id="revealH5pBtn" class="secondary" type="button" hidden>Afficher le fichier dans son dossier</button></div>
+        <p id="exportStatus" class="muted" role="status" aria-live="polite">Les modifications ne sont conservées sur disque qu'après l'enregistrement du fichier .h5p.</p>
+        <div class="status-line"><span id="appStatus">Prêt</span><span id="changeStatus"></span></div>
+      </section>
       <section class="panel" data-panel="visuel" hidden>
         <div class="sectionhead"><div><h2>Édition guidée de l’activité</h2><span class="filehint" id="visualLibrary">semantics.json</span></div>
         <div class="btns"><button class="primary" type="button" id="visualPreviewBtn">Prévisualiser les modifications</button><button class="secondary" type="button" id="visualJsonBtn">Données avancées</button></div></div>
@@ -52,7 +58,7 @@
         <input class="semantic-control" id="visualTitle" maxlength="400" type="text" autocomplete="off">
         <p class="muted" id="visualStatus" role="status" aria-live="polite">Importez une activité contenant ses fichiers de bibliothèque.</p>
         <div id="visualFields" class="semantic-form"></div>
-        <div class="btns visual-actions"><button class="primary" type="button" id="visualPreviewBottomBtn">Prévisualiser</button><button class="secondary" type="button" id="visualSaveBtn">Exporter le fichier .h5p</button></div>
+        <div class="btns visual-actions"><button class="primary" type="button" id="visualPreviewBottomBtn">Prévisualiser</button></div>
       </section>
       <section class="panel" data-panel="contenu">
         <div class="sectionhead"><div><h2>Données de l'activité</h2><span class="filehint">content/content.json</span></div><div class="btns"><button class="secondary" id="validateBtn" type="button">Valider JSON</button><button class="secondary" id="resetBtn" type="button">Réinitialiser</button></div></div>
@@ -91,11 +97,7 @@
         <div class="sectionhead"><h2>Rapport de diagnostic</h2></div>
         <pre id="reportText" class="report"></pre><p class="muted">Analyse statique uniquement. Le fonctionnement dans l'éditeur H5P ou Moodle reste à tester.</p>
       </section>
-      <section class="panel">
-        <div class="sectionhead"><div><h2>Export de l'archive</h2><p class="subtitle">Conserve les médias et les bibliothèques d'origine ; remplace les deux fichiers JSON édités.</p></div>
-        <button id="saveBtn" class="primary" type="button">Exporter en .h5p</button></div>
-        <div class="status-line"><span id="appStatus">Prêt</span><span id="changeStatus"></span></div>
-      </section>
+
    </div>
       <section class="panel" data-panel="registry" hidden>
         <div class="sectionhead"><div><h2>Bibliothèques H5P installées</h2><span class="filehint">Registre portable local</span></div>

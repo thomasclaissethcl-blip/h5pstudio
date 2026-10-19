@@ -13,7 +13,8 @@ const Catalog=require('../runtime/github-catalog.cjs');
 const Snapshots=require('../runtime/source-snapshots.cjs');
 const Journal=require('../runtime/operation-journal.cjs');
 const CoreAdapters=require('../runtime/core-adapters.cjs');
-const APP_VERSION='0.6.0';
+const {saveH5pFile}=require('../runtime/h5p-file-export.cjs');
+const APP_VERSION='0.6.1';
 // On packaged folder builds, __dirname belongs to resources/app.asar (read only).
 // Data must live next to the real executable, never inside app.asar.
 const portableRoot=resolvePortableRoot({portableDir:process.env.PORTABLE_EXECUTABLE_DIR,
@@ -32,7 +33,7 @@ try{
  console.warn('Données portables indisponibles ; repli dans le profil utilisateur : '+e.message);
 }
 app.setAppUserModelId('local.h5pstudio.portable');
-let mainWindow=null, preview=null, workdir=null, playerPromise=null, lastExport=null;
+let mainWindow=null, preview=null, workdir=null, playerPromise=null, lastExport=null, lastH5pExport=null;
 const cacheDir=path.join(dataRoot,'data','runtime','standalone',PLAYER_VERSION);
 const bundledDir=app.isPackaged?path.join(process.resourcesPath,'reader',PLAYER_VERSION):path.join(portableRoot,'runtime-bundled',PLAYER_VERSION);
 const exportsDir=path.join(dataRoot,'exports');
@@ -189,6 +190,24 @@ ipcMain.handle('desktop:preview',async(e,bytes)=>{
   return {url:preview.url,reader:runtime.source};
  }catch(error){await closePreview();throw error;}
 });
+// Unlike browser downloads, this waits for an explicit Windows Save As and a
+// completed filesystem write before acknowledging success to the renderer.
+ipcMain.handle('desktop:save-h5p',async(e,bytes,name)=>{
+ checkCaller(e);
+ const content=await prepareBytes(bytes);
+ const saved=await saveH5pFile({
+  bytes:content,requestedName:name,defaultDir:exportsDir,
+  showSaveDialog:options=>dialog.showSaveDialog(mainWindow,options)
+ });
+ if(saved.ok)lastH5pExport=saved.path;
+ return saved;
+});
+ipcMain.handle('desktop:reveal-h5p',async e=>{
+ checkCaller(e);
+ if(!lastH5pExport||!(await fsp.stat(lastH5pExport).catch(()=>null))?.isFile())return {ok:false};
+ shell.showItemInFolder(lastH5pExport);
+ return {ok:true};
+});
 ipcMain.handle('desktop:export',async(e,bytes,title)=>{
  checkCaller(e);
  const input=await prepareBytes(bytes);
@@ -215,7 +234,7 @@ ipcMain.handle('desktop:reveal-export',async(e)=>{
 });
 function createWindow(){
  mainWindow=new BrowserWindow({
-  title:'H5P Studio Portable 0.6.0',width:1400,height:930,minWidth:920,minHeight:650,
+  title:'H5P Studio Portable 0.6.1',width:1400,height:930,minWidth:920,minHeight:650,
   backgroundColor:'#f5f7fa',show:true,
   webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,
    preload:path.join(__dirname,'preload.cjs')}
@@ -245,10 +264,9 @@ app.whenReady().then(async()=>{
   fullscreenAllowed({permission,previewUrl:preview?.url,
    isAppWindow:!!mainWindow && contents===mainWindow.webContents,
    requestingUrl:details?.requestingUrl||requestingOrigin||''}));
- session.defaultSession.on('will-download',(event,item)=>{
-  if(!/\.h5p$/i.test(item.getFilename())){event.preventDefault();return;}
-  const name=path.basename(item.getFilename()).replace(/[^a-zA-Z0-9_.-]/g,'_').slice(0,130);
-  item.setSavePath(path.join(exportsDir,Date.now()+'-'+name));
+ session.defaultSession.on('will-download',(event)=>{
+  // Electron exports are created only by explicit Save As dialogs, never silently.
+  event.preventDefault();
  });
  createWindow();
  app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)createWindow();});

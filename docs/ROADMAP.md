@@ -9,11 +9,12 @@
 - 0.5.21 : nettoyage du dépôt, suppression des doublons et des workflows obsolètes, documentation d'installation sur dépôt neuf ; aucun changement fonctionnel majeur.
 
 - 0.5.21 : six contrôles Windows validés par l’utilisateur, 109 tests automatisés réussis.
-- 0.6.0 : prototype d’édition guidée depuis `semantics.json`, retour à l’édition après prévisualisation. Tests Windows en attente.
+- 0.6.0 : prototype d’édition guidée depuis `semantics.json`, retour à l’édition après prévisualisation. Import, édition et aperçu Windows fonctionnels ; anomalie signalée sur l’export .h5p.
+- 0.6.1 : correction ciblée du parcours « Enregistrer sous » .h5p, à valider sur Windows.
 
 ## Chantiers prioritaires
 
-1. Valider sous Windows l’édition guidée, la prévisualisation sans enregistrement et l’export, puis conserver la suite de non-régression.
+1. Valider sous Windows l’enregistrement .h5p avec choix explicite du dossier, l’annulation et la réouverture de l’archive ; conserver la suite de non-régression.
 2. Concevoir une installation et une activation **réelles** des différentes versions du cœur H5P, avec adaptateurs indépendants du lecteur Standalone et validation technique des API serveur/navigateur.
 3. Intégrer l’éditeur officiel H5PEditor avec son cœur d’édition, les widgets et bibliothèques multiversions. Prévoir la création d’une activité sans modèle existant.
 4. Generaliser la construction distante de bibliothèques par recettes relues et lancer les workflows depuis l'application après autorisation.

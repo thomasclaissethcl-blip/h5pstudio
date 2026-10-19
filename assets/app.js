@@ -135,6 +135,7 @@
       $('metadataJson').value=JSON.stringify(obj.metadata,null,2);
       $('contentJson').value=JSON.stringify(obj.content,null,2);
       text('currentFilename',file.name);
+      text('exportStatus','Aucun fichier exporté pour cette activité.');$('revealH5pBtn').hidden=true;
       text('editedTitle',obj.metadata.title);
       text('mainLibrary',obj.metadata.mainLibrary);
       text('libraryCount',String(obj.libraries.length));
@@ -167,13 +168,25 @@
       const blob=await H5PArchive.saveArchive(project,$('metadataJson').value,$('contentJson').value,
         progress => text('appStatus',`Création du fichier H5P : ${progress} %`));
       const output=H5PArchive.exportName(edited.metadata.title);
-      saveBlob(blob,output);
-      text('appStatus','Export terminé : '+output);
-      dirty=false; lastValidated=true;
-      text('changeStatus','Export effectué : '+output); $('changeStatus').className='';
-      if (edited.warnings.length) showAlert('Archive exportée avec '+edited.warnings.length+' anomalie(s) H5P signalée(s). Métadonnées préservées sans correction automatique. Vérifiez l’archive dans un éditeur H5P.', 'warning');
-      else showAlert('Archive H5P générée. Vérifiez son ouverture dans Lumi ou Logiquiz avant toute publication.', 'success');
-    } catch(e) {text('appStatus','Échec de l’export'); showAlert(e.message||String(e),'error');}
+      if(window.studioDesktop?.isDesktop){
+        if(!window.studioDesktop.saveH5p)throw Error('Enregistrement Windows indisponible : vérifiez la version de l’application.');
+        const result=await window.studioDesktop.saveH5p(new Uint8Array(await blob.arrayBuffer()),output);
+        if(result?.cancelled){text('appStatus','Enregistrement annulé.');text('exportStatus','Aucun nouveau fichier enregistré.');return;}
+        if(!result?.ok||!result.path)throw Error('L’écriture du fichier H5P n’a pas été confirmée.');
+        text('appStatus','Fichier H5P enregistré.');
+        text('exportStatus','Fichier enregistré : '+result.path);
+        $('revealH5pBtn').hidden=false;
+        dirty=false;lastValidated=true;
+        text('changeStatus','Enregistré : '+result.name);$('changeStatus').className='';
+        if(edited.warnings.length)showAlert('Fichier enregistré : '+result.path+'. '+edited.warnings.length+' avertissement(s) sur les métadonnées H5P.', 'warning');
+        else showAlert('Fichier H5P enregistré : '+result.path, 'success');
+      }else{
+        saveBlob(blob,output);
+        text('appStatus','Téléchargement demandé au navigateur : '+output);
+        text('exportStatus','Le navigateur gère le téléchargement : vérifiez sa liste de téléchargements. L’écriture sur disque ne peut pas être confirmée ici.');
+        showAlert('Téléchargement demandé au navigateur, non vérifié.','warning');
+      }
+    } catch(e) {text('appStatus','Échec de l’enregistrement');text('exportStatus','Le fichier n’a pas pu être enregistré : '+(e.message||String(e)));showAlert(e.message||String(e),'error');}
     finally {loading(false);}
   }
 
@@ -550,7 +563,10 @@
   $('returnEditBtn').addEventListener('click',()=>setTab(previousEditTab==='visuel'&&!$('visualTab').disabled?'visuel':previousEditTab));
   $('visualPreviewBtn').addEventListener('click',doPreview);
   $('visualPreviewBottomBtn').addEventListener('click',doPreview);
-  $('visualSaveBtn').addEventListener('click',exportH5P);
+  $('revealH5pBtn').addEventListener('click',async()=>{
+    try{const result=await window.studioDesktop?.revealH5p();if(!result?.ok)showAlert('Fichier H5P exporté introuvable.','warning');}
+    catch(e){showAlert(e.message||String(e),'error');}
+  });
   $('visualJsonBtn').addEventListener('click',()=>setTab('contenu'));
   $('visualTitle').addEventListener('change',changeVisualTitle);
   $('importReaderBtn').addEventListener('click',async()=>{

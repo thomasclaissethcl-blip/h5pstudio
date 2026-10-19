@@ -1,7 +1,7 @@
 {
   "name": "h5p-studio-portable",
   "productName": "H5P Studio Portable",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Prototype de formulaire H5P piloté par semantics.json avec prévisualisation, sur socle multiversion stable",
   "private": true,
   "main": "electron/main.cjs",
@@ -31,7 +31,7 @@
     ],
     "asar": true,
     "win": {
-      "artifactName": "H5P-Studio-Portable-0.6.0-${arch}.${ext}"
+      "artifactName": "H5P-Studio-Portable-0.6.1-${arch}.${ext}"
     },
     "extraResources": [
       {

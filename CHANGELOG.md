@@ -1,3 +1,14 @@
+# 0.6.1 : correction de l'enregistrement .h5p
+
+- Un seul bouton d'enregistrement `.h5p`, accessible en tête du projet.
+- Boîte de dialogue Windows **Enregistrer sous** ; la destination est choisie par l'utilisateur.
+- Confirmation uniquement après écriture sur disque et vérification de la taille.
+- Affichage du chemin réel et commande « Afficher le fichier dans son dossier ».
+- Annulation et erreurs traitées sans signaler une réussite à tort.
+- L'export HTML ZIP reste séparé et inchangé.
+- Tests de sauvegarde, d'annulation, d'erreur d'écriture et de vérification du fichier.
+- Édition guidée inchangée ; le véritable éditeur H5PEditor reste à intégrer.
+
 # 0.6.0 : premier prototype d’édition guidée
 
 - Nouveau panneau d’édition guidée piloté par `semantics.json`, disponible uniquement lorsque ce schéma est présent dans l’archive importée.

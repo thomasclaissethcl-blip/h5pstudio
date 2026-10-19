@@ -6,6 +6,8 @@ if(process.isMainFrame){
   info:()=>ipcRenderer.invoke('desktop:status'),
   preview:bytes=>ipcRenderer.invoke('desktop:preview',bytes),
   export:(bytes,title)=>ipcRenderer.invoke('desktop:export',bytes,title),
+  saveH5p:(bytes,name)=>ipcRenderer.invoke('desktop:save-h5p',bytes,name),
+  revealH5p:()=>ipcRenderer.invoke('desktop:reveal-h5p'),
   importPlayer:()=>ipcRenderer.invoke('desktop:import-player'),
   revealExport:()=>ipcRenderer.invoke('desktop:reveal-export'),
   registryList:()=>ipcRenderer.invoke('registry:list'),

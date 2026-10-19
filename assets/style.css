@@ -80,3 +80,8 @@ textarea.semantic-control{min-height:78px;resize:vertical;font-family:Consolas,m
 .form-note{font-size:12px;color:#5a6e84;line-height:1.55;margin:2px 0 8px}
 .semantic-small{font-size:12px;padding:8px 11px!important;width:max-content;max-width:100%}
 .visual-actions{border-top:1px solid #e0e7ef;padding-top:16px}
+
+/* 0.6.1: single visible, explicit save action and output location */
+.export-toolbar{padding:16px 20px;margin-bottom:20px}
+.export-toolbar #exportStatus{margin:10px 0 0;overflow-wrap:anywhere;line-height:1.55}
+.export-toolbar .status-line{margin-top:9px}
