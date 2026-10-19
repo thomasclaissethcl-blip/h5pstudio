@@ -1,0 +1,46 @@
+name: Construire des bibliothèques H5P (recettes)
+on:
+  workflow_dispatch:
+    inputs:
+      recipe:
+        type: choice
+        description: 'Recette relue et intégrée dans le dépôt'
+        required: true
+        options:
+          - game-map
+      primary_ref:
+        description: 'Tag, branche ou SHA de la bibliothèque principale'
+        required: true
+        default: '1.9.8'
+      secondary_ref:
+        description: 'Tag, branche ou SHA du composant éditeur'
+        required: true
+        default: 'master'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Récupérer le code approuvé de H5P Studio
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Préparer Node sur le runner distant
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Vérifier et appliquer la recette
+        env:
+          RECIPE: ${{ inputs.recipe }}
+          PRIMARY_REF: ${{ inputs.primary_ref }}
+          SECONDARY_REF: ${{ inputs.secondary_ref }}
+        run: node scripts/build-recipes.cjs "$RECIPE" "$PRIMARY_REF" "$SECONDARY_REF"
+      - name: Publier les bibliothèques construites et les commits précis
+        uses: actions/upload-artifact@v4
+        with:
+          name: H5P-bibliotheques-compilees
+          path: output/
+          if-no-files-found: error
+          retention-days: 14
