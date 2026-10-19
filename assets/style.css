@@ -66,3 +66,17 @@ button.secondary:hover{background:#f3f7fd}button:disabled{cursor:default;opacity
 .operation-item strong{display:block;overflow-wrap:anywhere}
 .operation-item p{margin:4px 0;color:#425671;overflow-wrap:anywhere}
 .operation-inline{flex:1 1 100%;font-size:12px;color:#315b89;margin:3px 0 0;overflow-wrap:anywhere}
+
+/* 0.6.0: limited semantics editor, ordinary accessible form controls */
+.semantic-form{display:grid;gap:12px;margin:20px 0}
+.semantic-field{display:grid;gap:7px;padding:14px 16px;border:1px solid #e0e7ef;border-radius:10px;background:#fff;min-width:0}
+.semantic-label{display:block;color:#243e60;font-weight:700;font-size:13px;margin:8px 0 4px}
+.semantic-control{display:block;width:100%;border:1px solid #bbcbdc;border-radius:7px;padding:10px 12px;background:white;color:#15263b;font:inherit;max-width:100%}
+.semantic-control[type="checkbox"]{width:20px;height:20px}
+.semantic-control:focus{outline:2px solid #4c83d3;outline-offset:2px}
+textarea.semantic-control{min-height:78px;resize:vertical;font-family:Consolas,monospace}
+.semantic-group{border:1px solid #cedbeb;border-radius:9px;margin:8px 0;padding:12px 14px;min-width:0}
+.semantic-group legend{padding:0 7px;color:#314962;font-weight:700}
+.form-note{font-size:12px;color:#5a6e84;line-height:1.55;margin:2px 0 8px}
+.semantic-small{font-size:12px;padding:8px 11px!important;width:max-content;max-width:100%}
+.visual-actions{border-top:1px solid #e0e7ef;padding-top:16px}

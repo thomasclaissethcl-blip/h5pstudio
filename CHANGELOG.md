@@ -1,3 +1,12 @@
+# 0.6.0 : premier prototype d’édition guidée
+
+- Nouveau panneau d’édition guidée piloté par `semantics.json`, disponible uniquement lorsque ce schéma est présent dans l’archive importée.
+- Champs pris en charge : texte, nombre, booléen, liste déroulante, groupes et listes simples. Valeurs préexistantes et champs non pris en charge préservés.
+- Prévisualisation directe des modifications en cours et bouton de retour à l’édition.
+- Titre modifiable sans toucher au JSON, édition avancée toujours accessible.
+- Aucun changement du moteur de lecture, des bibliothèques embarquées ou des versions de cœur.
+- Premier prototype limité : aucune prise en charge du widget d’édition officiel, de l’envoi de médias ou de la création entièrement vierge.
+
 # Historique des versions
 
 ## 0.5.21 : nettoyage et consolidation du dépôt

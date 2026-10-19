@@ -7,6 +7,7 @@
   let dirty = false;
   let lastValidated = false;
   let importBytes=null,projectId=null,registryRows=[],registryChoices={},lastImportLoaded=false;
+  let semanticSchema=null,previousEditTab='contenu';
   function text(id, value) { $(id).textContent = value; }
   function showAlert(message, kind='info') {
     const box = $('message'); box.textContent = message; box.dataset.kind = kind; box.hidden = false;
@@ -26,6 +27,8 @@
     }
   }
   function setTab(tab) {
+    if (tab==='visuel' && project) drawVisualEditor();
+    if (tab==='preview' && (active==='visuel'||active==='contenu'||active==='metadata')) previousEditTab=active;
     active=tab;
     document.querySelectorAll('[data-tab]').forEach(el => el.classList.toggle('selected', el.dataset.tab===tab));
     document.querySelectorAll('[data-panel]').forEach(el => el.hidden=el.dataset.panel!==tab);
@@ -66,6 +69,56 @@
       lastValidated=true;
     } catch(e) { lastValidated=false; showAlert(e.message,'error'); }
   }
+  // First milestone: semantic forms are not H5PEditor and never execute editor widgets.
+  // The raw JSON textareas remain the single source of truth for content changes.
+  function drawVisualEditor() {
+    if(!project)return;
+    $('visualTitle').value='';
+    const status=$('visualStatus');
+    const host=$('visualFields');host.replaceChildren();
+    if(!semanticSchema?.available){
+      status.textContent=semanticSchema?.reason||'Schéma indisponible : utilisez les données avancées.';
+      return;
+    }
+    let content,metadata;
+    try{
+      metadata=JSON.parse($('metadataJson').value);
+      content=JSON.parse($('contentJson').value);
+      if(!content||typeof content!=='object'||Array.isArray(content))throw Error('Le contenu JSON doit être un objet.');
+      if(!metadata||typeof metadata!=='object'||Array.isArray(metadata))throw Error('Métadonnées JSON invalides.');
+    }catch(e){status.textContent='Le JSON actuel est invalide : '+e.message+' Corrigez-le en mode avancé.';return;}
+    $('visualTitle').value=String(metadata.title||'');
+    const stats=H5PSemanticEditor.statistics(semanticSchema.fields);
+    status.textContent=`Bibliothèque ${semanticSchema.library} ${semanticSchema.version}. ${stats.supported} champ(s) simples disponibles, ${stats.unsupported} structure(s) non gérée(s). Aucune migration ni changement de version.`;
+    try{
+      H5PSemanticEditor.render(document,host,semanticSchema.fields,content,next=>{
+        $('contentJson').value=JSON.stringify(next,null,2);markDirty();
+      },e=>showAlert(e.message||String(e),'error'));
+    }catch(e){host.replaceChildren();showAlert('Formulaire H5P indisponible : '+(e.message||e),'error');}
+  }
+  async function loadVisualSchema() {
+    semanticSchema=null;
+    $('visualTab').disabled=true;
+    try{
+      semanticSchema=await H5PSemanticEditor.readSemantics(project);
+      if(!semanticSchema.available){$('visualStatus').textContent=semanticSchema.reason;return false;}
+      if(H5PSemanticEditor.statistics(semanticSchema.fields).supported===0){
+        $('visualStatus').textContent='Cette bibliothèque ne contient pas de champs simples éditables.';return false;
+      }
+      $('visualTab').disabled=false;
+      return true;
+    }catch(e){$('visualStatus').textContent='Édition guidée indisponible : '+(e.message||e);return false;}
+  }
+  function changeVisualTitle() {
+    if(!project)return;
+    try{
+      const value=$('visualTitle').value.trim();
+      if(!value)throw Error('Le titre ne peut pas être vide.');
+      const meta=JSON.parse($('metadataJson').value);
+      meta.title=value;$('metadataJson').value=JSON.stringify(meta,null,2);
+      text('editedTitle',value);markDirty();
+    }catch(e){showAlert('Impossible de modifier le titre : '+(e.message||e),'error');}
+  }
   async function importFile(file) {
     if (!file) return;
     if (!/\.h5p$/i.test(file.name)) return showAlert('Veuillez sélectionner une archive portant l’extension .h5p.', 'error');
@@ -87,9 +140,10 @@
       text('libraryCount',String(obj.libraries.length));
       text('warningCount',String(obj.warnings.length));
       text('currentSize',(file.size/1024/1024).toFixed(2)+' Mo');
-      text('appStatus', 'Archive ouverte. Édition JSON disponible.');
+      text('appStatus', 'Archive ouverte. Édition guidée proposée lorsqu’un schéma compatible est inclus.');
       $('workspace').hidden=false; $('emptyState').hidden=true; $('previewTab').disabled=false; $('shortcutStatic').disabled=false;
-      librariesTable(obj.libraries); updateReport(); setTab('contenu');
+      librariesTable(obj.libraries); updateReport();
+      const visualReady=await loadVisualSchema();setTab(visualReady?'visuel':'contenu');
       $('registryFromCurrentBtn').disabled=!window.studioDesktop?.isDesktop;
       $('registryResolveBtn').disabled=!window.studioDesktop?.isDesktop;
       await refreshRegistry();
@@ -493,6 +547,12 @@
     catch(e){showAlert(e.message||String(e),'error');}
   });
   $('viewBtn').addEventListener('click',doPreview);
+  $('returnEditBtn').addEventListener('click',()=>setTab(previousEditTab==='visuel'&&!$('visualTab').disabled?'visuel':previousEditTab));
+  $('visualPreviewBtn').addEventListener('click',doPreview);
+  $('visualPreviewBottomBtn').addEventListener('click',doPreview);
+  $('visualSaveBtn').addEventListener('click',exportH5P);
+  $('visualJsonBtn').addEventListener('click',()=>setTab('contenu'));
+  $('visualTitle').addEventListener('change',changeVisualTitle);
   $('importReaderBtn').addEventListener('click',async()=>{
     if(!window.studioDesktop)return;
     try {const x=await window.studioDesktop.importPlayer();if(x?.ok){$('readerFallback').hidden=true;showAlert('Lecteur local enregistré. Vous pouvez relancer la prévisualisation.', 'success');}}

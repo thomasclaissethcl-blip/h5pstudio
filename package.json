@@ -1,8 +1,8 @@
 {
   "name": "h5p-studio-portable",
   "productName": "H5P Studio Portable",
-  "version": "0.5.21",
-  "description": "H5P Studio Portable : sources rationalisées, compilations distantes à recettes vérifiées, journal local et suivi du cœur H5P",
+  "version": "0.6.0",
+  "description": "Prototype de formulaire H5P piloté par semantics.json avec prévisualisation, sur socle multiversion stable",
   "private": true,
   "main": "electron/main.cjs",
   "scripts": {
@@ -31,7 +31,7 @@
     ],
     "asar": true,
     "win": {
-      "artifactName": "H5P-Studio-Portable-0.5.21-${arch}.${ext}"
+      "artifactName": "H5P-Studio-Portable-0.6.0-${arch}.${ext}"
     },
     "extraResources": [
       {
