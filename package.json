@@ -1,0 +1,43 @@
+{
+  "name": "h5p-studio-portable",
+  "productName": "H5P Studio Portable",
+  "version": "0.5.21",
+  "description": "H5P Studio Portable : sources rationalisées, compilations distantes à recettes vérifiées, journal local et suivi du cœur H5P",
+  "private": true,
+  "main": "electron/main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.cjs",
+    "prepare:player": "node scripts/fetch-player.cjs",
+    "build:win": "npm run prepare:player && electron-builder --win --x64 --dir"
+  },
+  "devDependencies": {
+    "electron": "44.8.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "local.h5pstudio.portable",
+    "productName": "H5P Studio Portable",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "assets/**",
+      "electron/**",
+      "runtime/**",
+      "package.json",
+      "!**/*.md"
+    ],
+    "asar": true,
+    "win": {
+      "artifactName": "H5P-Studio-Portable-0.5.21-${arch}.${ext}"
+    },
+    "extraResources": [
+      {
+        "from": "runtime-bundled/3.8.2",
+        "to": "reader/3.8.2"
+      }
+    ]
+  }
+}

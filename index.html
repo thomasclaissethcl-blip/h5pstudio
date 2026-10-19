@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>H5P Studio Portable | Version 0.5.1</title>
+ <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+ <aside class="sidebar">
+   <div class="brand"><span class="logo">H5P</span> Studio Portable</div>
+   <p class="tagline">Atelier local d'inspection et de modification des archives H5P. Aucun contenu n'est envoyé en ligne.</p>
+   <div class="side-label">Atelier</div>
+   <nav class="nav" aria-label="Sections">
+     <button data-tab="contenu" class="selected">Données du contenu</button>
+     <button data-tab="metadata">Manifest H5P</button>
+     <button data-tab="libraries">Bibliothèques</button>
+     <button data-tab="report">Diagnostic</button>
+   </nav>
+   <div class="side-label">Lecture et diffusion</div>
+   <nav class="nav">
+      <button disabled title="L’intégration de l’éditeur visuel officiel reste un jalon ultérieur">Éditeur visuel H5P (à venir)</button>
+      <button data-tab="preview" id="previewTab" disabled title="Importez un H5P pour le prévisualiser dans l’application">Prévisualisation intégrée</button>
+      <button id="shortcutStatic" disabled title="Importez un H5P pour produire un ZIP HTML autonome">Export HTML multifichier</button>
+      <button data-tab="registry" id="registryTab">Registre multiversion</button>
+      <button data-tab="updates" id="updatesTab">Sources et mises à jour</button>
+   </nav>
+   <div class="side-foot">Version 0.5.1<br>Moteur embarqué lors de la compilation. Aucun installateur nécessaire.</div>
+ </aside>
+ <main class="main">
+   <div class="head"><div><h1>Atelier d'archives H5P</h1><p class="subtitle">Importer, inspecter, prévisualiser et exporter sans manipuler de scripts.</p></div><div class="version">V0.5.1 expérimental</div></div>
+   <div class="notice" id="message" role="status" aria-live="polite" hidden></div>
+   <section class="panel" id="dropZone">
+      <div class="drop"><div class="symbol" aria-hidden="true">&#8682;</div><h2>Ouvrir une activité .h5p</h2>
+      <p class="muted">Glissez votre fichier ici ou utilisez le bouton. Traitement entièrement local.</p>
+      <button id="importBtn" class="primary" type="button">Choisir un fichier H5P</button><input type="file" id="fileInput" accept=".h5p" hidden>
+      <p class="muted">Limite de précaution : archive de 250 Mo, 3 000 entrées maximum.</p></div>
+   </section>
+   <div id="emptyState" class="panel empty">Aucune archive ouverte. L'importation analysera les versions et dépendances sans exécuter le code H5P.</div>
+   <div id="workspace" hidden>
+      <div class="summary">
+        <div class="stat"><label>Fichier ouvert</label><div class="value" id="currentFilename"></div><div class="muted" id="currentSize"></div></div>
+        <div class="stat"><label>Type principal</label><div class="value" id="mainLibrary"></div></div>
+        <div class="stat"><label>Bibliothèques</label><div class="value" id="libraryCount"></div></div>
+        <div class="stat"><label>Avertissements</label><div class="value" id="warningCount"></div></div>
+      </div>
+      <section class="panel" data-panel="contenu">
+        <div class="sectionhead"><div><h2>Données de l'activité</h2><span class="filehint">content/content.json</span></div><div class="btns"><button class="secondary" id="validateBtn" type="button">Valider JSON</button><button class="secondary" id="resetBtn" type="button">Réinitialiser</button></div></div>
+        <p class="info">Édition structurée en JSON, sans formulaires H5P. Pour modifier des activités complexes, connaître leur schéma de données est nécessaire. L'éditeur visuel officiel sera intégré dans une phase ultérieure.</p>
+        <textarea id="contentJson" class="editor" spellcheck="false" aria-label="Données JSON H5P"></textarea>
+      </section>
+      <section class="panel" data-panel="metadata" hidden>
+        <div class="sectionhead"><div><h2>Métadonnées du paquet</h2><span class="filehint">h5p.json</span></div></div>
+        <p class="info">Titre actuel : <strong id="editedTitle"></strong>. Les versions et les dépendances sont conservées, sauf si vous les modifiez explicitement. Une modification de version dans ce fichier ne réalise aucune migration de contenu.</p>
+        <textarea id="metadataJson" class="editor" spellcheck="false" aria-label="Métadonnées JSON H5P"></textarea>
+      </section>
+      <section class="panel" data-panel="libraries" hidden>
+        <div class="sectionhead"><h2>Bibliothèques embarquées</h2><span class="filehint">lecture seule</span></div>
+        <p class="info">Ces versions proviennent exclusivement des fichiers <code>library.json</code> de l'archive. Elles ne sont pas mises à jour automatiquement.</p>
+        <div style="overflow:auto"><table class="data-table"><thead><tr><th>Bibliothèque</th><th>Version</th><th>API cœur déclarée</th><th>Répertoire</th></tr></thead><tbody id="librariesTable"></tbody></table></div>
+      </section>
+      <section class="panel" data-panel="preview" hidden>
+        <div class="sectionhead"><div><h2>Prévisualisation intégrée</h2><span class="filehint">Lecteur H5P local</span></div></div>
+        <p class="info">Le lecteur est installé dans l’application ou préparé automatiquement. L’activité s’affiche dans cette fenêtre. Aucune commande PowerShell n’est nécessaire.</p>
+        <div class="btns"><button id="viewBtn" class="primary" type="button">Prévisualiser l’activité</button>
+          <button id="staticBtn" class="secondary" type="button">Exporter HTML multifichier</button>
+          <button id="revealExportBtn" class="secondary" type="button" hidden>Afficher le ZIP dans son dossier</button></div>
+        <p id="previewStatus" class="muted" role="status" aria-live="polite">Importez un fichier H5P pour prévisualiser.</p>
+        <div class="preview-container" id="previewContainer" hidden>
+          <iframe id="previewFrame" title="Activité H5P prévisualisée" allow="fullscreen" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
+        </div>
+        <div class="muted" id="desktopFallback" hidden>
+          L’aperçu intégré nécessite l’application Electron. Ce fichier HTML ouvert directement dans un navigateur permet seulement le diagnostic et l’édition JSON.
+        </div>
+        <div class="player-fallback" id="readerFallback" hidden>
+          <p>Le lecteur H5P intégré est absent ou inaccessible. Cette option de dépannage permet de sélectionner un dossier <code>player</code> contenant un lecteur H5P Standalone complet. Elle n’est normalement pas nécessaire dans la version Windows compilée.</p>
+          <button type="button" id="importReaderBtn" class="secondary">Sélectionner un lecteur local</button>
+        </div>
+      </section>
+      <section class="panel" data-panel="report" hidden>
+        <div class="sectionhead"><h2>Rapport de diagnostic</h2></div>
+        <pre id="reportText" class="report"></pre><p class="muted">Analyse statique uniquement. Le fonctionnement dans l'éditeur H5P ou Moodle reste à tester.</p>
+      </section>
+      <section class="panel">
+        <div class="sectionhead"><div><h2>Export de l'archive</h2><p class="subtitle">Conserve les médias et les bibliothèques d'origine ; remplace les deux fichiers JSON édités.</p></div>
+        <button id="saveBtn" class="primary" type="button">Exporter en .h5p</button></div>
+        <div class="status-line"><span id="appStatus">Prêt</span><span id="changeStatus"></span></div>
+      </section>
+   </div>
+      <section class="panel" data-panel="registry" hidden>
+        <div class="sectionhead"><div><h2>Bibliothèques H5P installées</h2><span class="filehint">Registre portable local</span></div>
+          <button class="secondary" type="button" id="refreshRegistryBtn">Actualiser</button></div>
+        <p class="info">Cette première version installe et inventorie plusieurs versions, y compris des bibliothèques de développeurs tiers. Elle n'applique pas encore les changements de version aux activités : une migration et la vérification des dépendances seront nécessaires.</p>
+        <div class="btns">
+          <button class="primary" type="button" id="registryFromCurrentBtn" disabled>Enregistrer les bibliothèques du H5P ouvert</button>
+          <button class="secondary" type="button" id="registryFromFileBtn">Importer un paquet local .h5p ou .zip</button>
+        </div>
+        <p class="muted" id="registryStatus" role="status" aria-live="polite">Registre local : aucune analyse exécutée.</p>
+        <div class="summary registry-summary">
+          <div class="stat"><label>Variantes installées</label><div class="value" id="registryCount">0</div></div>
+          <div class="stat"><label>Types distincts</label><div class="value" id="registryNames">0</div></div>
+          <div class="stat"><label>Moteur embarqué</label><div class="value">Standalone 3.8.2</div><p class="muted">API cœur exacte non certifiée</p></div>
+        </div>
+        <details class="registry-details"><summary>Dernier rapport d’importation : installations, doublons et rejets</summary>
+          <pre id="registryImportReport" class="report">Importez un H5P pour obtenir un rapport détaillé de cette opération.</pre>
+        </details>
+        <div class="panel-inline registry-audit">
+          <h3>Contrôle du lecteur et des dépendances</h3>
+          <p class="muted" id="coreEvidenceStatus">API H5P Core embarquée : non certifiée. Version du lecteur et API H5P sont deux informations différentes.</p>
+          <button id="registryResolveBtn" class="secondary" type="button" disabled>Analyser les dépendances de l’activité ouverte</button>
+          <pre id="registryResolveReport" class="report">Aucun contrôle réalisé. Les versions retenues ne sont pas appliquées aux fichiers.</pre>
+        </div>
+        <div style="overflow:auto"><table class="data-table"><thead><tr><th>Bibliothèque</th><th>Version</th><th>Origine</th><th>API requise</th><th>Identifiant</th></tr></thead><tbody id="registryTable"></tbody></table></div>
+        <div class="registry-choice panel-inline">
+          <h3>Choix de version pour l'activité ouverte</h3>
+          <p class="muted">Enregistré pour le fichier H5P original. Ce choix est une préférence de projet : il n'altère ni le fichier H5P, ni la prévisualisation, ni l'export pour le moment.</p>
+          <div class="btns">
+            <label class="field">Bibliothèque<br><select id="registryLibrarySelect"></select></label>
+            <label class="field">Version installée<br><select id="registryVersionSelect"></select></label>
+            <button class="secondary" id="registrySelectBtn" type="button" disabled>Enregistrer ce choix</button>
+          </div>
+          <p class="muted" id="registryChoiceStatus">Importez une activité et installez au moins une bibliothèque pour effectuer un choix.</p>
+        </div>
+      </section>
+      <section class="panel" data-panel="updates" hidden>
+        <div class="sectionhead"><div><h2>Sources et mises à jour H5P</h2><p class="subtitle">Cœur officiel de lecture et d’édition, bibliothèques officielles et dépôts tiers.</p></div><button class="secondary" id="catalogRefreshBtn" type="button">Rafraîchir la liste</button></div>
+        <p class="info">V0.5.21 : consultation GitHub et conservation des sources exactes par commit SHA. Les bibliothèques dont les ressources compilées sont présentes peuvent être ajoutées au registre. Les sources qui nécessitent une compilation sont conservées, mais ne sont pas installées. Le cœur est téléchargeable en tant que source, sans activation dans le moteur.</p>
+        <div class="panel-inline">
+          <h3>Ajouter une source de bibliothèque tierce</h3>
+          <div class="btns"><input id="catalogRepoInput" type="text" placeholder="propriétaire/dépôt ou URL github.com" aria-label="Dépôt GitHub" maxlength="160" class="catalog-input"><button type="button" class="secondary" id="catalogAddBtn">Suivre ce dépôt</button></div>
+          <p class="muted">Aucune exécution automatique de code ni mise à niveau implicite.</p>
+        </div>
+        <p id="catalogStatus" role="status" class="muted">Consultez une source pour vérifier ses publications.</p>
+        <div style="overflow:auto"><table class="data-table"><thead><tr><th>Source suivie</th><th>Type</th><th>Actions</th></tr></thead><tbody id="catalogSourcesTable"></tbody></table></div>
+        <div class="panel-inline">
+          <h3>Publications et versions observées</h3>
+          <pre id="catalogReport" class="report">Sélectionnez « Vérifier » dans la liste des sources.</pre>
+          <div id="catalogAssets" class="catalog-assets"></div>
+          <div id="catalogSourceRefs" class="catalog-assets"></div>
+        </div>
+        <div class="panel-inline">
+          <div class="sectionhead"><h3>Historique des opérations</h3><button type="button" class="secondary" id="journalRefreshBtn">Actualiser</button></div>
+          <p class="muted">Révisions téléchargées, éventuelles erreurs et emplacement local. Historique conservé après fermeture (120 opérations au maximum).</p>
+          <div id="journalEntries" class="operation-list" aria-live="polite">Chargement de l’historique…</div>
+        </div>
+        <div class="panel-inline">
+          <div class="sectionhead"><h3>Révisions du cœur conservées</h3><button type="button" class="secondary" id="coreRefreshBtn">Actualiser</button></div>
+          <p class="muted">Ces sources sont conservées pour préparer les adaptateurs futurs ; elles ne sont pas des versions du cœur activées.</p>
+          <pre class="report" id="coreCandidatesReport">Aucune source du cœur examinée.</pre>
+        </div>
+        <p class="muted">Un workflow GitHub générique, utilisant exclusivement des recettes approuvées, est inclus dans les sources. Game Map est la première recette disponible. Les sources externes peuvent exécuter du JavaScript lors de la prévisualisation future. N’installez que des bibliothèques provenant d’auteurs de confiance. L’installation dans le registre ne remplace aucune version existante.</p>
+      </section>
+   <p class="muted">Moteur d’exécution : <span id="runtimeVersion">Standalone 3.8.2 (profil de compatibilité à vérifier)</span>. Éditeur visuel encore à intégrer ; compatibilité Moodle à vérifier.</p>
+ </main>
+</div>
+<script src="assets/jszip.min.js"></script><script src="assets/h5p-core.js"></script><script src="assets/static-builder.js"></script><script src="assets/app.js"></script>
+</body>
+</html>

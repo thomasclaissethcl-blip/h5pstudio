@@ -1,0 +1,30 @@
+'use strict';
+const {contextBridge,ipcRenderer}=require('electron');
+if(process.isMainFrame){
+ contextBridge.exposeInMainWorld('studioDesktop',Object.freeze({
+  isDesktop:true,
+  info:()=>ipcRenderer.invoke('desktop:status'),
+  preview:bytes=>ipcRenderer.invoke('desktop:preview',bytes),
+  export:(bytes,title)=>ipcRenderer.invoke('desktop:export',bytes,title),
+  importPlayer:()=>ipcRenderer.invoke('desktop:import-player'),
+  revealExport:()=>ipcRenderer.invoke('desktop:reveal-export'),
+  registryList:()=>ipcRenderer.invoke('registry:list'),
+  registryLastImport:()=>ipcRenderer.invoke('registry:last-import'),
+  registryCoreEvidence:()=>ipcRenderer.invoke('registry:core-evidence'),
+  registryResolve:(projectId,roots)=>ipcRenderer.invoke('registry:resolve',projectId,roots),
+  registryFingerprint:bytes=>ipcRenderer.invoke('registry:fingerprint',bytes),
+  registryImportOpen:(bytes,name)=>ipcRenderer.invoke('registry:import-open',bytes,name),
+  registryImportLocal:()=>ipcRenderer.invoke('registry:import-local'),
+  registryChoices:id=>ipcRenderer.invoke('registry:choices',id),
+  registrySelect:(id,name,variant)=>ipcRenderer.invoke('registry:select',id,name,variant),
+  catalogSources:()=>ipcRenderer.invoke('catalog:sources'),
+  catalogAdd:repo=>ipcRenderer.invoke('catalog:add',repo),
+  catalogRemove:repo=>ipcRenderer.invoke('catalog:remove',repo),
+  catalogCheck:repo=>ipcRenderer.invoke('catalog:check',repo),
+  catalogInstall:(repo,assetId)=>ipcRenderer.invoke('catalog:install',repo,assetId),
+  catalogSnapshot:(repo,sha)=>ipcRenderer.invoke('catalog:source-snapshot',repo,sha),
+  catalogRevealSource:(repo,sha)=>ipcRenderer.invoke('catalog:reveal-source',repo,sha),
+  journalList:()=>ipcRenderer.invoke('journal:list'),
+  coreCandidates:()=>ipcRenderer.invoke('core:candidates')
+ }));
+}

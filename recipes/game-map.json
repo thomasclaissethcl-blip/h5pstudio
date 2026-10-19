@@ -1,0 +1,25 @@
+{
+  "id": "game-map",
+  "label": "Game Map et son éditeur",
+  "maintainer": "otacke",
+  "modules": [
+    {
+      "id": "reader",
+      "repo": "otacke/h5p-game-map",
+      "defaultRef": "1.9.8",
+      "expectedMachineName": "H5P.GameMap",
+      "node": "22",
+      "install": "ci",
+      "build": "build"
+    },
+    {
+      "id": "editor",
+      "repo": "otacke/h5p-editor-game-map",
+      "defaultRef": "master",
+      "expectedMachineName": "H5PEditor.GameMap",
+      "node": "22",
+      "install": "ci",
+      "build": "build"
+    }
+  ]
+}
