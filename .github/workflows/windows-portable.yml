@@ -1,0 +1,58 @@
+name: Compiler H5P Studio Windows DOSSIER
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'electron/**'
+      - 'runtime/**'
+      - 'assets/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'index.html'
+      - '.github/workflows/windows-portable.yml'
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - name: Récupérer H5P Studio
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Préparer Node sur GitHub (aucune installation locale)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Installer les dépendances (lockfile si disponible)
+        shell: pwsh
+        run: |
+          if (Test-Path package-lock.json) {
+            npm ci --no-audit --no-fund
+          } else {
+            npm install --no-audit --no-fund
+          }
+      - name: Publier le lockfile généré pour pouvoir le versionner ensuite
+        uses: actions/upload-artifact@v4
+        with:
+          name: H5P-Studio-0.5.21-package-lock
+          path: package-lock.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Audit npm (informatif)
+        run: npm audit --audit-level=high
+        continue-on-error: true
+      - name: Tests de non-régression
+        run: npm test
+      - name: Compiler la distribution Windows DOSSIER
+        run: npm run build:win
+      - name: Publier uniquement le dossier Windows portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: H5P-Studio-Portable-0.5.21-Windows-DOSSIER
+          path: dist/win-unpacked/
+          if-no-files-found: error
+          retention-days: 14
