@@ -30,11 +30,11 @@ test('les modules et tests actifs n’existent qu’à leur emplacement canoniqu
 
 test('version synchronisée dans la distribution et dans l’interface',()=>{
  const pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'0.6.1');
+ assert.equal(pkg.version,'0.6.2');
  assert.equal(pkg.main,'electron/main.cjs');
- assert.match(read('electron/main.cjs'),/APP_VERSION='0\.6\.1'/);
- assert.match(read('index.html'),/V0\.6\.1/);
- assert.match(read('.github/workflows/windows-portable.yml'),/0\.6\.1-Windows-DOSSIER/);
+ assert.match(read('electron/main.cjs'),/APP_VERSION='0\.6\.2'/);
+ assert.match(read('index.html'),/V0\.6\.2/);
+ assert.match(read('.github/workflows/windows-portable.yml'),/0\.6\.2-Windows-DOSSIER/);
 });
 
 test('aucun ancien guide ni script Windows obsolète dans le dépôt',()=>{
@@ -58,5 +58,5 @@ test('le workflow supporte npm ci seulement après la création d’un lockfile 
  assert.match(text,/Test-Path package-lock\.json/);
  assert.match(text,/npm ci --no-audit --no-fund/);
  assert.match(text,/npm install --no-audit --no-fund/);
- assert.match(text,/name: H5P-Studio-0\.6\.1-package-lock/);
+ assert.match(text,/name: H5P-Studio-0\.6\.2-package-lock/);
 });

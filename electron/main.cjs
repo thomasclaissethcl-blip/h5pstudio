@@ -14,7 +14,7 @@ const Snapshots=require('../runtime/source-snapshots.cjs');
 const Journal=require('../runtime/operation-journal.cjs');
 const CoreAdapters=require('../runtime/core-adapters.cjs');
 const {saveH5pFile}=require('../runtime/h5p-file-export.cjs');
-const APP_VERSION='0.6.1';
+const APP_VERSION='0.6.2';
 // On packaged folder builds, __dirname belongs to resources/app.asar (read only).
 // Data must live next to the real executable, never inside app.asar.
 const portableRoot=resolvePortableRoot({portableDir:process.env.PORTABLE_EXECUTABLE_DIR,
@@ -234,7 +234,7 @@ ipcMain.handle('desktop:reveal-export',async(e)=>{
 });
 function createWindow(){
  mainWindow=new BrowserWindow({
-  title:'H5P Studio Portable 0.6.1',width:1400,height:930,minWidth:920,minHeight:650,
+  title:'H5P Studio Portable 0.6.2',width:1400,height:930,minWidth:920,minHeight:650,
   backgroundColor:'#f5f7fa',show:true,
   webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,
    preload:path.join(__dirname,'preload.cjs')}

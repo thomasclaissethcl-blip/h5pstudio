@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
- <title>H5P Studio Portable | Version 0.6.1</title>
+ <title>H5P Studio Portable | Version 0.6.2</title>
  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -12,6 +12,7 @@
    <p class="tagline">Atelier local d'inspection et de modification des archives H5P. Aucun contenu n'est envoyé en ligne.</p>
    <div class="side-label">Atelier</div>
    <nav class="nav" aria-label="Sections">
+     <button data-tab="officiel" id="officialTab" disabled>Widget H5P officiel (essai)</button>
      <button data-tab="visuel" id="visualTab" disabled>Édition guidée (prototype)</button>
      <button data-tab="contenu" class="selected">Données JSON avancées</button>
      <button data-tab="metadata">Manifest H5P</button>
@@ -25,10 +26,10 @@
       <button data-tab="registry" id="registryTab">Registre multiversion</button>
       <button data-tab="updates" id="updatesTab">Sources et mises à jour</button>
    </nav>
-   <div class="side-foot">Version 0.6.1<br>Moteur embarqué lors de la compilation. Aucun installateur nécessaire.</div>
+   <div class="side-foot">Version 0.6.2<br>Moteur embarqué lors de la compilation. Aucun installateur nécessaire.</div>
  </aside>
  <main class="main">
-   <div class="head"><div><h1>H5P Studio : édition et prévisualisation</h1><p class="subtitle">Formulaire guidé pour champs simples, données avancées et prévisualisation locale.</p></div><div class="version">V0.6.1 expérimental</div></div>
+   <div class="head"><div><h1>H5P Studio : édition et prévisualisation</h1><p class="subtitle">Formulaire guidé pour champs simples, données avancées et prévisualisation locale.</p></div><div class="version">V0.6.2 expérimental</div></div>
    <div class="notice" id="message" role="status" aria-live="polite" hidden></div>
    <section class="panel" id="dropZone">
       <div class="drop"><div class="symbol" aria-hidden="true">&#8682;</div><h2>Ouvrir une activité .h5p</h2>
@@ -64,6 +65,16 @@
         <div class="sectionhead"><div><h2>Données de l'activité</h2><span class="filehint">content/content.json</span></div><div class="btns"><button class="secondary" id="validateBtn" type="button">Valider JSON</button><button class="secondary" id="resetBtn" type="button">Réinitialiser</button></div></div>
         <p class="info">Mode avancé pour les contenus dont les champs ne sont pas encore disponibles dans l’édition guidée. Les modifications faites ici peuvent aussi être prévisualisées.</p>
         <textarea id="contentJson" class="editor" spellcheck="false" aria-label="Données JSON H5P"></textarea>
+      </section>
+      <section class="panel" data-panel="officiel" hidden>
+        <div class="sectionhead"><h2>Widget officiel H5PEditor.Text</h2><span class="filehint">Mode expérimental isolé</span></div>
+        <p class="info">Premier essai avec le véritable widget de saisie de texte H5P. Il fonctionne uniquement sur les champs texte simples de la bibliothèque importée. Ce mode ne constitue pas encore l’éditeur H5P complet. Les autres champs et ressources restent inchangés.</p>
+        <label class="field" for="officialFieldSelect">Champ texte à modifier</label>
+        <select id="officialFieldSelect" class="semantic-control"></select>
+        <p class="muted" id="officialStatus" role="status" aria-live="polite">Ouvrez un fichier H5P contenant un champ texte simple.</p>
+        <iframe id="officialFrame" class="official-frame" title="Widget de saisie de texte officiel H5P" sandbox="allow-scripts" referrerpolicy="no-referrer" src="assets/official-editor-host.html" loading="eager"></iframe>
+        <div class="btns"><button type="button" class="secondary" id="officialBackBtn">Retour à l’édition guidée</button><button type="button" class="secondary" id="officialPreviewBtn">Prévisualiser les modifications</button></div>
+        <p class="muted">En cas d’erreur du composant officiel, le formulaire guidé et l’édition JSON restent disponibles.</p>
       </section>
       <section class="panel" data-panel="metadata" hidden>
         <div class="sectionhead"><div><h2>Métadonnées du paquet</h2><span class="filehint">h5p.json</span></div></div>
@@ -162,9 +173,9 @@
         </div>
         <p class="muted">Un workflow GitHub générique, utilisant exclusivement des recettes approuvées, est inclus dans les sources. Game Map est la première recette disponible. Les sources externes peuvent exécuter du JavaScript lors de la prévisualisation future. N’installez que des bibliothèques provenant d’auteurs de confiance. L’installation dans le registre ne remplace aucune version existante.</p>
       </section>
-   <p class="muted">Moteur d’exécution : <span id="runtimeVersion">Standalone 3.8.2 (profil de compatibilité à vérifier)</span>. Formulaire guidé expérimental ; éditeur officiel H5P encore à intégrer.</p>
+   <p class="muted">Moteur d’exécution : <span id="runtimeVersion">Standalone 3.8.2 (profil de compatibilité à vérifier)</span>. Formulaire guidé et widget texte officiel expérimental ; éditeur H5P complet encore à intégrer.</p>
  </main>
 </div>
-<script src="assets/jszip.min.js"></script><script src="assets/h5p-core.js"></script><script src="assets/semantic-editor.js"></script><script src="assets/static-builder.js"></script><script src="assets/app.js"></script>
+<script src="assets/jszip.min.js"></script><script src="assets/h5p-core.js"></script><script src="assets/semantic-editor.js"></script><script src="assets/static-builder.js"></script><script src="assets/official-editor-bridge.js"></script><script src="assets/app.js"></script>
 </body>
 </html>

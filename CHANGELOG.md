@@ -1,3 +1,15 @@
+# 0.6.2 : premier pont expérimental vers H5PEditor.Text
+
+- Conservation du socle 0.6.1 et de son lecteur Standalone 3.8.2.
+- Onglet expérimental affichant **le script officiel** du widget de saisie `H5PEditor.Text`, dans une iframe à origine isolée et sans API Electron.
+- Sélection seulement des champs texte simples, à la version exacte contenue dans l’archive H5P importée. Les champs riches, personnalisés et complexes restent dans le formulaire guidé / JSON, sans modification automatique.
+- Transmission contrôlée des changements vers `content/content.json` en cours, réutilisant l’enregistrement `.h5p` existant, la prévisualisation et l’export HTML.
+- Préparation du script officiel depuis un **commit Git fixé**, et de jQuery 3.7.1, à la compilation distante. Empreintes SHA256 et provenance inscrites dans le paquet construit.
+- Nouveaux contrôles de passerelle, d’isolation, de conservation des contenus et de cohérence de distribution.
+- **Limites :** aucun H5PEditor complet ; pas de build Windows réalisé localement, ni de validation sur l’ordinateur de l’utilisateur. L’intégration graphique effective du widget doit être contrôlée après la compilation GitHub Actions.
+
+---
+
 # 0.6.1 : correction de l'enregistrement .h5p
 
 - Un seul bouton d'enregistrement `.h5p`, accessible en tête du projet.

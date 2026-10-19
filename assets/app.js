@@ -8,6 +8,7 @@
   let lastValidated = false;
   let importBytes=null,projectId=null,registryRows=[],registryChoices={},lastImportLoaded=false;
   let semanticSchema=null,previousEditTab='contenu';
+  let officialFields=[],officialReady=false,officialNonce=null;
   function text(id, value) { $(id).textContent = value; }
   function showAlert(message, kind='info') {
     const box = $('message'); box.textContent = message; box.dataset.kind = kind; box.hidden = false;
@@ -28,8 +29,9 @@
   }
   function setTab(tab) {
     if (tab==='visuel' && project) drawVisualEditor();
-    if (tab==='preview' && (active==='visuel'||active==='contenu'||active==='metadata')) previousEditTab=active;
+    if (tab==='preview' && ['officiel','visuel','contenu','metadata'].includes(active)) previousEditTab=active;
     active=tab;
+    if(tab==='officiel' && project)drawOfficialEditor();
     document.querySelectorAll('[data-tab]').forEach(el => el.classList.toggle('selected', el.dataset.tab===tab));
     document.querySelectorAll('[data-panel]').forEach(el => el.hidden=el.dataset.panel!==tab);
   }
@@ -96,18 +98,72 @@
       },e=>showAlert(e.message||String(e),'error'));
     }catch(e){host.replaceChildren();showAlert('Formulaire H5P indisponible : '+(e.message||e),'error');}
   }
+  function drawOfficialEditor(){
+    const status=$('officialStatus');
+    if(!project||!officialFields.length){status.textContent='Aucun champ texte simple compatible dans cette activité.';return;}
+    const select=$('officialFieldSelect');
+    const field=officialFields.find(x=>x.name===select.value)||officialFields[0];
+    if(!field)return;
+    if(!officialReady){status.textContent='Chargement du widget officiel H5P…';return;}
+    let content;
+    try{
+      content=JSON.parse($('contentJson').value);
+      if(!content||Array.isArray(content)||typeof content!=='object')throw Error('Paramètres H5P invalides.');
+      const current=content[field.name];
+      if(current!==undefined&&typeof current!=='string')throw Error('La valeur du champ n’est pas un texte. Aucune conversion automatique.');
+      const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);
+      officialNonce=Array.from(bytes,x=>x.toString(16).padStart(2,'0')).join('');
+      const data={type:'h5p-widget-init',protocol:1,nonce:officialNonce,
+        field:H5POfficialBridge.safeField(field),value:current};
+      $('officialFrame').contentWindow.postMessage(data,'*');
+      status.textContent='Initialisation de '+field.name+' avec le composant officiel…';
+    }catch(e){status.textContent='Widget non disponible : '+(e.message||e);}
+  }
+  function refreshOfficialFields(){
+    officialNonce=null;officialFields=H5POfficialBridge.fields(semanticSchema?.fields);
+    const select=$('officialFieldSelect');select.replaceChildren();
+    for(const field of officialFields){const opt=document.createElement('option');opt.value=field.name;opt.textContent=String(field.label||field.name);select.append(opt);}
+    $('officialTab').disabled=!officialFields.length || !window.studioDesktop?.isDesktop;
+    $('officialStatus').textContent=officialFields.length?
+      `${officialFields.length} champ(s) texte compatible(s). Interface officielle expérimentale.`:
+      'Aucun champ texte simple compatible ; utilisez le formulaire guidé ou le JSON avancé.';
+  }
+  window.addEventListener('message',event=>{
+    const frame=$('officialFrame');
+    if(event.source!==frame.contentWindow)return;
+    const data=event.data;
+    if(data?.type==='h5p-widget-ready'&&data.protocol===1){
+      officialReady=true;if(active==='officiel')drawOfficialEditor();return;
+    }
+    if(active!=='officiel'||!H5POfficialBridge.acceptableMessage(event,frame,officialNonce,data?.type))return;
+    if(data.type==='h5p-widget-mounted'){
+      text('officialStatus','Widget H5PEditor.Text chargé. Modifiez la valeur ; le changement est conservé dans le contenu en cours.');
+    }else if(data.type==='h5p-widget-error'){
+      text('officialStatus','Erreur du widget officiel : '+String(data.message||'inconnue').slice(0,300));
+    }else if(data.type==='h5p-widget-value'){
+      try{
+        const field=officialFields.find(x=>x.name===$('officialFieldSelect').value);
+        if(!field)throw Error('Champ non sélectionné.');
+        const content=JSON.parse($('contentJson').value);
+        const next=H5POfficialBridge.updateContent(content,field,data.value,data.hasValue===true);
+        $('contentJson').value=JSON.stringify(next,null,2);markDirty();
+        text('officialStatus','Modification reçue du widget officiel et conservée dans le contenu en cours. Utilisez Enregistrer sous (.h5p) pour produire le fichier.');
+      }catch(e){text('officialStatus','Modification refusée : '+(e.message||e));}
+    }
+  });
   async function loadVisualSchema() {
     semanticSchema=null;
-    $('visualTab').disabled=true;
+    $('visualTab').disabled=true;refreshOfficialFields();
     try{
       semanticSchema=await H5PSemanticEditor.readSemantics(project);
+      refreshOfficialFields();
       if(!semanticSchema.available){$('visualStatus').textContent=semanticSchema.reason;return false;}
       if(H5PSemanticEditor.statistics(semanticSchema.fields).supported===0){
         $('visualStatus').textContent='Cette bibliothèque ne contient pas de champs simples éditables.';return false;
       }
       $('visualTab').disabled=false;
       return true;
-    }catch(e){$('visualStatus').textContent='Édition guidée indisponible : '+(e.message||e);return false;}
+    }catch(e){refreshOfficialFields();$('visualStatus').textContent='Édition guidée indisponible : '+(e.message||e);return false;}
   }
   function changeVisualTitle() {
     if(!project)return;
@@ -574,6 +630,10 @@
     try {const x=await window.studioDesktop.importPlayer();if(x?.ok){$('readerFallback').hidden=true;showAlert('Lecteur local enregistré. Vous pouvez relancer la prévisualisation.', 'success');}}
     catch(e){showAlert(e.message||String(e),'error');}
   });
+  $('officialFrame').addEventListener('load',()=>{officialReady=true;if(active==='officiel')drawOfficialEditor();});
+  $('officialFieldSelect').addEventListener('change',()=>{if(active==='officiel')drawOfficialEditor();});
+  $('officialBackBtn').addEventListener('click',()=>setTab($('visualTab').disabled?'contenu':'visuel'));
+  $('officialPreviewBtn').addEventListener('click',()=>doPreview());
   $('shortcutStatic').addEventListener('click',()=>setTab('preview'));
   $('resetBtn').addEventListener('click',doReset);
   $('validateBtn').addEventListener('click',updateValidation);

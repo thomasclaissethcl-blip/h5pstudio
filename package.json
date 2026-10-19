@@ -1,15 +1,17 @@
 {
   "name": "h5p-studio-portable",
   "productName": "H5P Studio Portable",
-  "version": "0.6.1",
-  "description": "Prototype de formulaire H5P piloté par semantics.json avec prévisualisation, sur socle multiversion stable",
+  "version": "0.6.2",
+  "description": "Prototype isolé du widget officiel H5PEditor.Text sur socle 0.6.1 préservé",
   "private": true,
   "main": "electron/main.cjs",
   "scripts": {
     "start": "electron .",
     "test": "node --test tests/*.test.cjs",
     "prepare:player": "node scripts/fetch-player.cjs",
-    "build:win": "npm run prepare:player && electron-builder --win --x64 --dir"
+    "build:win": "npm run prepare:editor && npm run verify:editor && npm run prepare:player && electron-builder --win --x64 --dir",
+    "prepare:editor": "node scripts/prepare-editor.cjs",
+    "verify:editor": "node scripts/verify-editor.cjs"
   },
   "devDependencies": {
     "electron": "44.8.0",
@@ -31,7 +33,7 @@
     ],
     "asar": true,
     "win": {
-      "artifactName": "H5P-Studio-Portable-0.6.1-${arch}.${ext}"
+      "artifactName": "H5P-Studio-Portable-0.6.2-${arch}.${ext}"
     },
     "extraResources": [
       {
@@ -39,5 +41,8 @@
         "to": "reader/3.8.2"
       }
     ]
+  },
+  "dependencies": {
+    "jquery": "3.7.1"
   }
 }

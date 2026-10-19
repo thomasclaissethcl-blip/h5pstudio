@@ -85,3 +85,7 @@ textarea.semantic-control{min-height:78px;resize:vertical;font-family:Consolas,m
 .export-toolbar{padding:16px 20px;margin-bottom:20px}
 .export-toolbar #exportStatus{margin:10px 0 0;overflow-wrap:anywhere;line-height:1.55}
 .export-toolbar .status-line{margin-top:9px}
+
+/* 0.6.2 : véritable widget texte officiel dans un iframe sans privilèges. */
+.official-frame{display:block;width:100%;height:200px;border:1px solid #d3deed;border-radius:10px;background:#fff;margin:14px 0 17px}
+[data-panel="officiel"] .semantic-control{max-width:600px;margin:9px 0}

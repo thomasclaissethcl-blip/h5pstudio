@@ -1,0 +1,13 @@
+'use strict';
+const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');const vm=require('node:vm');const crypto=require('node:crypto');
+const dir=path.join(__dirname,'..','assets','vendor');
+const manifest=JSON.parse(fs.readFileSync(path.join(dir,'provenance.json'),'utf8'));
+assert.match(manifest.commit,/^[a-f0-9]{40}$/);
+const file=fs.readFileSync(path.join(dir,'h5peditor-text.js'));
+assert.equal(crypto.createHash('sha256').update(file).digest('hex'),manifest.officialSha256);
+const ns={widgets:{}};
+vm.runInNewContext(file.toString('utf8'),{ns}, {timeout:1000});
+assert.equal(typeof ns.widgets.text,'function','Véritable widget H5PEditor.Text requis');
+const widget=new ns.widgets.text(null,{name:'test',type:'text'},'départ',()=>{});
+assert.equal(widget.value,'départ');
+console.log('Source officielle reconnue et instanciée (sans test graphique Electron).');
