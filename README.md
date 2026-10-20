@@ -1,4 +1,4 @@
-# H5P Studio Portable 0.6.2 : premier widget officiel expérimental
+# H5P Studio Portable 0.6.2.1 : premier widget officiel expérimental
 
 Cette version reprend intégralement les fonctionnalités validées en **0.6.1** et ajoute un onglet **Widget H5P officiel (essai)**, destiné aux champs de texte simples contenus dans les bibliothèques importées. Cet onglet utilise le fichier JavaScript officiel `H5PEditor.Text`, préparé au moment de la compilation sur GitHub Actions, et l’exécute dans un cadre isolé. Les modifications rejoignent les données courantes de l’activité ; le bouton **Enregistrer sous… (.h5p)** produit toujours le fichier sur disque et la prévisualisation emploie toujours H5P Standalone 3.8.2.
 
@@ -14,7 +14,7 @@ L’édition guidée utilise le fichier `semantics.json` inclus dans une archive
 Elle permet de modifier les champs simples : texte, nombre, case à cocher, choix, groupes et certaines listes.
 Les champs et composants non pris en charge sont conservés sans modification. Les champs HTML sont affichés sous forme de texte source, sans éditeur de mise en forme.
 
-Le formulaire guidé de la 0.6.1 n’est **pas le véritable éditeur H5PEditor**. Le nouvel onglet 0.6.2 utilise un widget officiel isolé, sans moteur complet. Les widgets H5P (médias, bibliothèques imbriquées, bibliothèques H5PEditor, ressources distantes) et la création sans archive modèle restent à développer. Les révisions du cœur officiel ne sont pas encore activables.
+Le formulaire guidé de la 0.6.1 n’est **pas le véritable éditeur H5PEditor**. Le nouvel onglet 0.6.2.1 utilise un widget officiel isolé, sans moteur complet. Les widgets H5P (médias, bibliothèques imbriquées, bibliothèques H5PEditor, ressources distantes) et la création sans archive modèle restent à développer. Les révisions du cœur officiel ne sont pas encore activables.
 
 Le bouton **Prévisualiser** utilise les données en cours et le lecteur existant ; il ne sauvegarde pas le `.h5p` sur disque. Pour conserver les modifications, utilisez **Enregistrer sous… (.h5p)** et choisissez le dossier de destination. L’activité originale n’est pas modifiée.
 
@@ -30,7 +30,7 @@ Lire **[GUIDE-GITHUB-062.md](GUIDE-GITHUB-062.md)** avant d'importer les sources
 
 ## Compiler sans Node.js local
 
-Dans GitHub, ouvrir **Actions > Compiler H5P Studio Windows DOSSIER > Run workflow**, sur la branche par défaut. Télécharger l'artefact `H5P-Studio-Portable-0.6.2-Windows-DOSSIER` et extraire les fichiers. Le workflow exécute les tests avant l'empaquetage et récupère H5P Standalone 3.8.2 comme lecteur de transition.
+Dans GitHub, ouvrir **Actions > Compiler H5P Studio Windows DOSSIER > Run workflow**, sur la branche par défaut. Télécharger l'artefact `H5P-Studio-Portable-0.6.2.1-Windows-DOSSIER` et extraire les fichiers. Le workflow exécute les tests avant l'empaquetage et récupère H5P Standalone 3.8.2 comme lecteur de transition.
 
 Le workflow **Construire des bibliothèques H5P (recettes)** compile à distance les recettes inscrites dans `recipes/`. La recette Game Map est un cas de validation, pas une dépendance de l'application. Son installation dans le registre ne modifie pas automatiquement les activités H5P ouvertes.
 
@@ -69,3 +69,18 @@ L’application n’affiche un succès qu’après écriture et vérification de
 Le chemin complet apparaît sous le bouton, et **Afficher le fichier dans son dossier** l’ouvre dans l’Explorateur.
 En cas d’annulation ou d’échec, aucune réussite n’est annoncée et les modifications restent dans l’éditeur.
 Le bouton **Exporter HTML multifichier** utilise une autre boîte de dialogue, indépendante de celle du `.h5p`.
+
+
+## Correctif expérimental 0.6.2.1 : chargement du widget officiel
+
+Le widget officiel H5PEditor.Text dispose désormais de sa propre origine locale sécurisée
+(`h5p-widget://editor/`), servie par une liste explicite de ressources Electron.
+Il ne reçoit aucune API Node/Electron ni accès direct aux données du projet.
+L'onglet effectue une vérification active de l'initialisation et signale les scripts
+absents, les erreurs JavaScript observables ou une absence de réponse après 8 secondes.
+Un bouton **Réessayer le chargement** et une zone de diagnostic sont disponibles.
+
+La compilation Windows exécute un test de fenêtre Electron supplémentaire qui
+charge le widget, le monte et simule une modification de valeur. Ce test devra
+être confirmé par les journaux GitHub Actions et les vérifications Windows.
+Les widgets riches, médias et activités imbriquées restent hors périmètre.

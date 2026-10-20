@@ -51,9 +51,9 @@
     else copy[field.name]=v;
     return copy;
   }
-  function acceptableMessage(event,frame,nonce,type){
+  function acceptableMessage(event,frame,nonce,type,origin){
     const data=event?.data;
-    return !!frame && event.source===frame.contentWindow && object(data) &&
+    return typeof nonce==='string' && /^[a-f0-9]{32}$/.test(nonce) && !!frame && event.source===frame.contentWindow && (!origin||event.origin===origin) && object(data) &&
       data.type===type && data.protocol===1 && data.nonce===nonce;
   }
   return {fields,safeField,eligible,validateChange,updateContent,acceptableMessage,MAX};

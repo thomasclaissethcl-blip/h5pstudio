@@ -1,0 +1,9 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Contrôle graphique H5PEditor.Text</title></head>
+<body><iframe id="widget" sandbox="allow-scripts allow-same-origin" src="h5p-widget://editor/official-editor-host.html" title="Contrôle du widget"></iframe>
+<script>
+window.__smokeMessages=[];
+window.addEventListener('message',e=>{
+ if(e.source!==document.getElementById('widget').contentWindow || e.origin!=='h5p-widget://editor')return;
+ if(e.data&&typeof e.data==='object')window.__smokeMessages.push(e.data);
+});
+</script></body></html>

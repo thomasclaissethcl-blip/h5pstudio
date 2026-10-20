@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
- <title>H5P Studio Portable | Version 0.6.2</title>
+ <title>H5P Studio Portable | Version 0.6.2.1</title>
  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -26,10 +26,10 @@
       <button data-tab="registry" id="registryTab">Registre multiversion</button>
       <button data-tab="updates" id="updatesTab">Sources et mises à jour</button>
    </nav>
-   <div class="side-foot">Version 0.6.2<br>Moteur embarqué lors de la compilation. Aucun installateur nécessaire.</div>
+   <div class="side-foot">Version 0.6.2.1<br>Moteur embarqué lors de la compilation. Aucun installateur nécessaire.</div>
  </aside>
  <main class="main">
-   <div class="head"><div><h1>H5P Studio : édition et prévisualisation</h1><p class="subtitle">Formulaire guidé pour champs simples, données avancées et prévisualisation locale.</p></div><div class="version">V0.6.2 expérimental</div></div>
+   <div class="head"><div><h1>H5P Studio : édition et prévisualisation</h1><p class="subtitle">Formulaire guidé pour champs simples, données avancées et prévisualisation locale.</p></div><div class="version">V0.6.2.1 expérimental</div></div>
    <div class="notice" id="message" role="status" aria-live="polite" hidden></div>
    <section class="panel" id="dropZone">
       <div class="drop"><div class="symbol" aria-hidden="true">&#8682;</div><h2>Ouvrir une activité .h5p</h2>
@@ -72,8 +72,9 @@
         <label class="field" for="officialFieldSelect">Champ texte à modifier</label>
         <select id="officialFieldSelect" class="semantic-control"></select>
         <p class="muted" id="officialStatus" role="status" aria-live="polite">Ouvrez un fichier H5P contenant un champ texte simple.</p>
-        <iframe id="officialFrame" class="official-frame" title="Widget de saisie de texte officiel H5P" sandbox="allow-scripts" referrerpolicy="no-referrer" src="assets/official-editor-host.html" loading="eager"></iframe>
-        <div class="btns"><button type="button" class="secondary" id="officialBackBtn">Retour à l’édition guidée</button><button type="button" class="secondary" id="officialPreviewBtn">Prévisualiser les modifications</button></div>
+        <iframe id="officialFrame" class="official-frame" title="Widget de saisie de texte officiel H5P" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer" src="h5p-widget://editor/official-editor-host.html" loading="eager"></iframe>
+        <details id="officialDiagnosticBox" hidden><summary>Détails du diagnostic</summary><pre class="report" id="officialDiagnostic"></pre></details>
+        <div class="btns"><button type="button" class="secondary" id="officialRetryBtn">Réessayer le chargement</button><button type="button" class="secondary" id="officialBackBtn">Retour à l’édition guidée</button><button type="button" class="secondary" id="officialPreviewBtn">Prévisualiser les modifications</button></div>
         <p class="muted">En cas d’erreur du composant officiel, le formulaire guidé et l’édition JSON restent disponibles.</p>
       </section>
       <section class="panel" data-panel="metadata" hidden>

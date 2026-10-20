@@ -1,3 +1,15 @@
+## 0.6.2.1 (correctif expérimental à valider sur Windows)
+
+- Version npm : `0.6.2-hotfix.1` (notation SemVer valide) ; numéro affiché et nom des archives : `0.6.2.1`.
+- Chargement du widget de texte H5P via le protocole local dédié `h5p-widget://editor/`, sans recours direct à `file:` dans son iframe.
+- Maintien de la séparation d'origine entre l'application et le widget, ressources servies à partir d'une liste fixe.
+- Suppression de la fausse confirmation de chargement liée au seul événement `iframe.load`.
+- Vérification active des scripts et du montage, identification des ressources manquantes, délais de 8 secondes et diagnostic lisible.
+- Bouton « Réessayer le chargement » et bloc de diagnostic accessible.
+- Ajout de 7 tests Node (140 au total) et d'un test graphique Electron à exécuter dans GitHub Actions Windows.
+- Aucun changement volontaire du lecteur H5P Standalone 3.8.2, des exports, du registre ou des données utilisateurs.
+- Validation locale : tests Node uniquement. Validation graphique et compilation Windows à confirmer.
+
 # 0.6.2 : premier pont expérimental vers H5PEditor.Text
 
 - Conservation du socle 0.6.1 et de son lecteur Standalone 3.8.2.

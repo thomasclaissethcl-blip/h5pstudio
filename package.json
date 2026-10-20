@@ -1,8 +1,8 @@
 {
   "name": "h5p-studio-portable",
   "productName": "H5P Studio Portable",
-  "version": "0.6.2",
-  "description": "Prototype isolé du widget officiel H5PEditor.Text sur socle 0.6.1 préservé",
+  "version": "0.6.2-hotfix.1",
+  "description": "Diagnostic et chargement isolé du widget officiel H5PEditor.Text, correctif 0.6.2.1",
   "private": true,
   "main": "electron/main.cjs",
   "scripts": {
@@ -11,7 +11,8 @@
     "prepare:player": "node scripts/fetch-player.cjs",
     "build:win": "npm run prepare:editor && npm run verify:editor && npm run prepare:player && electron-builder --win --x64 --dir",
     "prepare:editor": "node scripts/prepare-editor.cjs",
-    "verify:editor": "node scripts/verify-editor.cjs"
+    "verify:editor": "node scripts/verify-editor.cjs",
+    "test:widget-ui": "electron scripts/smoke-widget-electron.cjs --disable-gpu"
   },
   "devDependencies": {
     "electron": "44.8.0",
@@ -33,7 +34,7 @@
     ],
     "asar": true,
     "win": {
-      "artifactName": "H5P-Studio-Portable-0.6.2-${arch}.${ext}"
+      "artifactName": "H5P-Studio-Portable-0.6.2.1-${arch}.${ext}"
     },
     "extraResources": [
       {

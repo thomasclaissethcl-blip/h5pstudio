@@ -1,5 +1,5 @@
 'use strict';
-const {app,BrowserWindow,ipcMain,dialog,session,shell}=require('electron');
+const {app,BrowserWindow,ipcMain,dialog,session,shell,protocol}=require('electron');
 const fs=require('node:fs');const fsp=fs.promises;const path=require('node:path');const os=require('node:os');const crypto=require('node:crypto');
 const {ensureRuntime,adoptLocalPlayer,PLAYER_VERSION}=require('../runtime/player-manager.cjs');
 const {extractPreview,exportStaticZip,startPreviewServer}=require('../runtime/studio-site.cjs');
@@ -14,7 +14,10 @@ const Snapshots=require('../runtime/source-snapshots.cjs');
 const Journal=require('../runtime/operation-journal.cjs');
 const CoreAdapters=require('../runtime/core-adapters.cjs');
 const {saveH5pFile}=require('../runtime/h5p-file-export.cjs');
-const APP_VERSION='0.6.2';
+const APP_VERSION='0.6.2.1';
+const EditorWidgetProtocol=require('../runtime/editor-widget-protocol.cjs');
+// Registered before app readiness; relative resources resolve under a distinct origin.
+protocol.registerSchemesAsPrivileged([{scheme:EditorWidgetProtocol.SCHEME,privileges:{standard:true,secure:true}}]);
 // On packaged folder builds, __dirname belongs to resources/app.asar (read only).
 // Data must live next to the real executable, never inside app.asar.
 const portableRoot=resolvePortableRoot({portableDir:process.env.PORTABLE_EXECUTABLE_DIR,
@@ -234,7 +237,7 @@ ipcMain.handle('desktop:reveal-export',async(e)=>{
 });
 function createWindow(){
  mainWindow=new BrowserWindow({
-  title:'H5P Studio Portable 0.6.2',width:1400,height:930,minWidth:920,minHeight:650,
+  title:'H5P Studio Portable 0.6.2.1',width:1400,height:930,minWidth:920,minHeight:650,
   backgroundColor:'#f5f7fa',show:true,
   webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,
    preload:path.join(__dirname,'preload.cjs')}
@@ -252,6 +255,7 @@ function createWindow(){
  mainWindow.webContents.on('will-attach-webview',e=>e.preventDefault());
 }
 app.whenReady().then(async()=>{
+ EditorWidgetProtocol.registerWidgetProtocol(session.defaultSession.protocol);
  await fsp.mkdir(exportsDir,{recursive:true});
  // Fullscreen is the only permission permitted, and only for our active local preview.
  // All other web permissions remain denied (camera, microphone, geolocation, etc.).

@@ -31,3 +31,16 @@ Les scripts du dépôt de l'éditeur sont indiqués sous licence MIT dans son RE
 - Le lecteur reste H5P Standalone 3.8.2. Il n'y a ni mise à jour implicite du cœur ni migration de paquet.
 
 Le jalon suivant peut élargir le même mécanisme aux autres widgets officiels et introduire, séparément, les services demandés par `H5PEditor.Editor`, avec tests de compatibilité et modèles H5P représentatifs. Cette extension devra conserver le cloisonnement établi ici.
+
+
+## Correctif 0.6.2.1 : origine, accusés de réception et diagnostic
+
+Retour de test utilisateur sur la 0.6.2 : écran bloqué sur « Initialisation de tryAgain ... », cadre vide. Le code original assimilait `iframe.load` à un succès du widget ; ce contrôle était insuffisant. L'absence de réponse n'était pas traitée.
+
+L'iframe de la 0.6.2.1 charge uniquement `h5p-widget://editor/official-editor-host.html`. Le gestionnaire Electron `runtime/editor-widget-protocol.cjs` n'autorise que les six fichiers HTML/JS nécessaires. Les autres URL donnent 404. Le protocole est `standard` et `secure` sans `bypassCSP` et sans exposer d'API IPC. La page principale (chargée depuis `file:`) est d'une origine distincte. C'est pourquoi `allow-scripts allow-same-origin` peut être utilisé **dans ce seul cadre d'origine distincte** ; ne pas dupliquer cette configuration pour un iframe chargé depuis l'origine de l'application ou un contenu H5P importé.
+
+Le contrôle initial utilise une sonde comportant un jeton de 128 bits. Un script de diagnostic indépendant de jQuery signale les erreurs de chargement et les ressources manquantes. L'interface vérifie la fenêtre émettrice, l'origine `h5p-widget://editor`, la version du message et le jeton. Elle envoie `h5p-widget-init` seulement après l'état `ready`. Le montage doit ensuite être confirmé séparément. Un diagnostic d'expiration apparaît au-delà de 8 secondes.
+
+Le test `npm run test:widget-ui` est prévu pour GitHub Actions Windows, **après** `npm run prepare:editor` et `npm run verify:editor`. Il ouvre une fenêtre Electron invisible, vérifie la présence du véritable widget, déclenche une modification de champ et constate la transmission de la valeur. La version Windows entière doit ensuite être testée par l'utilisateur, car ce test isolé ne couvre pas l'importation et l'enregistrement `.h5p`.
+
+Aucune version du cœur officiel n'est activée par ce correctif. Les champs enrichis et les fichiers restent non pris en charge. La cause exacte du blocage rencontré sur la 0.6.2 n'ayant pas été capturée dans les journaux Chromium de ce poste, le protocole local constitue une correction de conception fondée sur les contraintes identifiées, pas une preuve rétrospective de la cause unique.

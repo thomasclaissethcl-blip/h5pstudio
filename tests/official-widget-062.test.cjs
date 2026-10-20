@@ -52,8 +52,8 @@ test('messages iframe : origine de la fenêtre et nonce attendus, aucun accès I
  assert.equal(Bridge.acceptableMessage({...valid,source:{}},frame,'a'.repeat(32),'h5p-widget-value'),false);
  assert.equal(Bridge.acceptableMessage({...valid,data:{...valid.data,protocol:2}},frame,'a'.repeat(32),'h5p-widget-value'),false);
  const html=read('index.html');
- assert.match(html,/id="officialFrame"[^>]*sandbox="allow-scripts"/);
- assert.doesNotMatch(html,/id="officialFrame"[^>]*allow-same-origin/);
+ assert.match(html,/id="officialFrame"[^>]*sandbox="allow-scripts allow-same-origin"/);
+ assert.match(html,/id="officialFrame"[^>]*src="h5p-widget:\/\/editor\/official-editor-host.html"/);
  assert.doesNotMatch(read('assets/official-editor-host.html'),/https:\/\//);
  assert.match(read('electron/preload.cjs'),/if\(process\.isMainFrame\)/);
 });

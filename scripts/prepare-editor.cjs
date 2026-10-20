@@ -13,7 +13,7 @@ const sha256=data=>crypto.createHash('sha256').update(data).digest('hex');
 async function fetchHttps(link,redirects=0){
  if(redirects>3)throw Error('Trop de redirections HTTPS.');
  return new Promise((resolve,reject)=>{
-  const req=https.get(link,{timeout:20000,headers:{'User-Agent':'H5PStudio-build/0.6.2'}},response=>{
+  const req=https.get(link,{timeout:20000,headers:{'User-Agent':'H5PStudio-build/0.6.2.1'}},response=>{
     if([301,302,307,308].includes(response.statusCode)){
       const next=new URL(response.headers.location,link);
       response.resume();if(next.protocol!=='https:'||!['raw.githubusercontent.com'].includes(next.hostname))reject(Error('Redirection non autorisée.'));

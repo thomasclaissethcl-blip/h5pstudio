@@ -1,6 +1,7 @@
 /* Sandbox transport. No IPC bridge, no network, and no reference to app state. */
 (function(){
  'use strict';
+ window.__officialFrameBooted=true;
  const parentWindow=window.parent;
  let nonce=null,instance=null,fieldName=null;
  const send=(type,extra={})=>parentWindow.postMessage({type,protocol:1,nonce,...extra},'*');
