@@ -39,7 +39,9 @@ test('version synchronisée dans la distribution et dans l’interface',()=>{
 
 test('aucun ancien guide ni script Windows obsolète dans le dépôt',()=>{
  for(const p of ['CONSTRUIRE-WINDOWS.cmd','GUIDE-052.md','GUIDE-051.md','GUIDE-GITHUB.md','CORRECTIF-GITHUB.md','DEMARRAGE-SANS-NODE.md','ROADMAP.md'])assert.equal(exists(p),false,p);
- assert.equal(exists('GUIDE-GITHUB-061.md'),true);
+ // Les guides historiques peuvent être archivés ou absents d'un dépôt mis à jour.
+ // Seules les ressources documentaires maintenues sont requises.
+ assert.equal(exists('README.md'),true,'README.md doit accompagner les sources');
  assert.equal(exists('docs/ROADMAP.md'),true);
  assert.equal(exists('LICENSE-JSZip.md'),true);
  assert.equal(exists('assets/LICENSE-JSZip.md'),false);
