@@ -1,6 +1,6 @@
 'use strict';
 const {test}=require('node:test');const assert=require('node:assert/strict');
-const fs=require('node:fs');const path=require('node:path');const vm=require('node:vm');
+const fs=require('node:fs');const path=require('node:path');const vm=require('node:vm');const os=require('node:os');
 const root=path.join(__dirname,'..');const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const WidgetProtocol=require('../runtime/editor-widget-protocol.cjs');
 const Bridge=require('../assets/official-editor-bridge.js');
@@ -26,8 +26,29 @@ test('serveur isolé : ressource autorisée, ressources inconnues et méthode re
  assert.equal(bad.status,404);
  const post=await handler({method:'POST',url:'h5p-widget://editor/official-editor-host.html'});
  assert.equal(post.status,405);
- const missing=await handler({method:'GET',url:'h5p-widget://editor/vendor/jquery.min.js'});
- assert.equal(missing.status,404); // source tree has no downloaded vendor files
+ // Le workflow lance prepare:editor avant npm test : les fichiers vendor
+ // existent normalement sous GitHub Actions. Utiliser un dossier temporaire
+ // pour vérifier séparément les deux cas, quel que soit l'état de la build.
+ const fixture=fs.mkdtempSync(path.join(os.tmpdir(),'h5p-widget-protocol-'));
+ try{
+  let fixtureHandler;
+  WidgetProtocol.registerWidgetProtocol({handle:(_scheme,fn)=>{fixtureHandler=fn;}},{root:fixture});
+  const vendorUrl='h5p-widget://editor/vendor/jquery.min.js';
+  const missing=await fixtureHandler({method:'GET',url:vendorUrl});
+  assert.equal(missing.status,404,'Une ressource autorisée mais absente renvoie 404.');
+  fs.mkdirSync(path.join(fixture,'assets','vendor'),{recursive:true});
+  fs.writeFileSync(path.join(fixture,'assets','vendor','jquery.min.js'),'/* fixture de test */');
+  const present=await fixtureHandler({method:'GET',url:vendorUrl});
+  assert.equal(present.status,200,'Une ressource autorisée et présente renvoie 200.');
+  assert.equal(await present.text(),'/* fixture de test */');
+  assert.match(present.headers.get('content-type'),/javascript/);
+  fs.mkdirSync(path.join(fixture,'data'),{recursive:true});
+  fs.writeFileSync(path.join(fixture,'data','private.json'),'secret de test');
+  const forbidden=await fixtureHandler({method:'GET',url:'h5p-widget://editor/data/private.json'});
+  assert.equal(forbidden.status,404,'Même si elle existe, une URL hors liste reste interdite.');
+  const badMethod=await fixtureHandler({method:'POST',url:vendorUrl});
+  assert.equal(badMethod.status,405,'Seule la méthode GET est permise.');
+ }finally{fs.rmSync(fixture,{recursive:true,force:true});}
 });
 
 test('chargement du cadre : aucun statut ready déduit de load, handshake et délais obligatoires',()=>{
